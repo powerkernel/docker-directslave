@@ -1,6 +1,6 @@
 FROM debian
 # install bind
-RUN apt-get update && apt-get install bind9 -y --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN apt-get update && apt-get install bind9 supervisor -y --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 # copy source
 COPY ./directslave /usr/local/
 # SESSION RANDOM ID
@@ -10,7 +10,7 @@ RUN cat /usr/local/directslave/etc/directslave.conf
 RUN mkdir -p /var/lib/bind/slave
 RUN touch /var/lib/bind/slave/directslave.inc
 RUN echo 'include "/etc/bind/named.conf"' >> /var/lib/bind/slave/directslave.inc
-RUN echo 'allow-transfer {"none";};' >> /etc/bind/named.conf.options
+#RUN echo 'allow-transfer {"none";};' >> /etc/bind/named.conf.options
 RUN touch /usr/local/directslave/etc/passwd
 # permissions
 RUN chmod +x /usr/local/directslave/bin/*
@@ -20,6 +20,9 @@ RUN chown -R bind:bind /var/lib/bind/slave
 RUN /usr/local/directslave/bin/directslave-linux-amd64 --password admin:password
 # test
 RUN /usr/local/directslave/bin/directslave-linux-amd64 --check
+RUN /usr/sbin/named-checkconf /etc/bind/named.conf
 # good to go
-EXPOSE 2222
-CMD /usr/local/directslave/bin/directslave-linux-amd64 --run
+#CMD /usr/local/directslave/bin/directslave-linux-amd64 --run
+COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+EXPOSE 53/udp 53/tcp 2222/tcp
+CMD ["/usr/bin/supervisord"]
