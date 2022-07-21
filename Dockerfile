@@ -16,16 +16,17 @@ RUN rm /usr/local/directslave/bin/directslave-freebsd-amd64 \
     /usr/local/directslave/bin/directslave-macos-amd64
 
 # configure DirectSlave
-RUN sed -i "s/ssl               on/ssl          off/g" /usr/local/directslave/etc/directslave.conf
 RUN sed -i 's#Change_this_line_to_something_long_&_secure#'"$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)"'#g' /usr/local/directslave/etc/directslave.conf
 RUN sed -i "s/53/$(id -u bind)/g" /usr/local/directslave/etc/directslave.conf
 RUN sed -i "s/53/$(id -u bind)/g" /usr/local/directslave/etc/directslave.conf
 RUN sed -i "s/\/etc\/namedb\/directslave.inc/\/var\/lib\/bind\/slave\/directslave.inc/g" /usr/local/directslave/etc/directslave.conf
 RUN sed -i "s/\/etc\/namedb\/secondary/\/var\/lib\/bind\/slave/g" /usr/local/directslave/etc/directslave.conf
 RUN sed -i "s/\/usr\/local\/bin\/rndc/\/usr\/sbin\/rndc/g" /usr/local/directslave/etc/directslave.conf
+RUN sed -i "s/\/usr\/local\/directslave\/etc\/passwd/\/usr\/local\/directslave\/etc\/passwd\/default/g" /usr/local/directslave/etc/directslave.conf
 RUN mkdir -p /var/lib/bind/slave
 RUN touch /var/lib/bind/slave/directslave.inc
-RUN touch /usr/local/directslave/etc/passwd
+RUN mkdir -p /usr/local/directslave/etc/passwd
+RUN touch /usr/local/directslave/etc/passwd/default
 
 # configure bind9
 RUN echo "include \"/var/lib/bind/slave/directslave.inc\";" >> /etc/bind/named.conf
@@ -34,9 +35,6 @@ RUN echo "include \"/var/lib/bind/slave/directslave.inc\";" >> /etc/bind/named.c
 RUN chmod +x /usr/local/directslave/bin/*
 RUN chown -R bind:bind /usr/local/directslave
 RUN chown -R bind:bind /var/lib/bind/slave
-
-# set default password
-RUN /usr/local/directslave/bin/directslave-linux-amd64 --password root:$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
 
 # test
 RUN /usr/local/directslave/bin/directslave-linux-amd64 --check
