@@ -1,8 +1,14 @@
-version: '3.7'
-services:
+version: '3'
 
+volumes:
+  data:
+    driver: local
+
+services:
   directslave:
     image: powerkernel/directslave
+    container_name: directslave
+    restart: unless-stopped
     ports:
       - target: 2222
         published: 2222
@@ -13,3 +19,6 @@ services:
       - target: 53
         published: 53
         protocol: udp
+    volumes:
+      - ./passwd:/usr/local/directslave/etc/passwd
+      - data:/var/lib/bind/slave

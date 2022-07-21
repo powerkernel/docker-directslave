@@ -1,28 +1,51 @@
-FROM debian
-# install bind
-RUN apt-get update && apt-get install bind9 supervisor -y --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-# copy source
-COPY ./directslave /usr/local/
-# SESSION RANDOM ID
+FROM ubuntu:22.04
+ARG dsversion=3.4.3
+
+# install software
+RUN apt-get update && apt-get install bind9 supervisor curl openssl ca-certificates -y --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# download directslave and unzip
+RUN curl https://directslave.com/download/directslave-$dsversion-advanced-all.tar.gz -o directslave.tar.gz
+RUN tar -xf directslave.tar.gz --directory /usr/local
+RUN rm directslave.tar.gz
+RUN mv /usr/local/directslave/etc/directslave.conf.sample /usr/local/directslave/etc/directslave.conf
+RUN rm /usr/local/directslave/bin/directslave-freebsd-amd64 \
+    /usr/local/directslave/bin/directslave-freebsd-i386 \
+    /usr/local/directslave/bin/directslave-linux-arm \
+    /usr/local/directslave/bin/directslave-linux-i386 \
+    /usr/local/directslave/bin/directslave-macos-amd64
+
+# configure DirectSlave
+RUN sed -i "s/ssl               on/ssl          off/g" /usr/local/directslave/etc/directslave.conf
 RUN sed -i 's#Change_this_line_to_something_long_&_secure#'"$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)"'#g' /usr/local/directslave/etc/directslave.conf
-RUN cat /usr/local/directslave/etc/directslave.conf
-# config
+RUN sed -i "s/53/$(id -u bind)/g" /usr/local/directslave/etc/directslave.conf
+RUN sed -i "s/53/$(id -u bind)/g" /usr/local/directslave/etc/directslave.conf
+RUN sed -i "s/\/etc\/namedb\/directslave.inc/\/var\/lib\/bind\/slave\/directslave.inc/g" /usr/local/directslave/etc/directslave.conf
+RUN sed -i "s/\/etc\/namedb\/secondary/\/var\/lib\/bind\/slave/g" /usr/local/directslave/etc/directslave.conf
+RUN sed -i "s/\/usr\/local\/bin\/rndc/\/usr\/sbin\/rndc/g" /usr/local/directslave/etc/directslave.conf
 RUN mkdir -p /var/lib/bind/slave
 RUN touch /var/lib/bind/slave/directslave.inc
-RUN echo 'include "/etc/bind/named.conf"' >> /var/lib/bind/slave/directslave.inc
-#RUN echo 'allow-transfer {"none";};' >> /etc/bind/named.conf.options
 RUN touch /usr/local/directslave/etc/passwd
+
+# configure bind9
+RUN echo "include \"/var/lib/bind/slave/directslave.inc\";" >> /etc/bind/named.conf
+
 # permissions
 RUN chmod +x /usr/local/directslave/bin/*
 RUN chown -R bind:bind /usr/local/directslave
 RUN chown -R bind:bind /var/lib/bind/slave
+
 # set default password
-RUN /usr/local/directslave/bin/directslave-linux-amd64 --password admin:password
+RUN /usr/local/directslave/bin/directslave-linux-amd64 --password root:$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+
 # test
 RUN /usr/local/directslave/bin/directslave-linux-amd64 --check
-RUN /usr/sbin/named-checkconf /etc/bind/named.conf
-# good to go
-#CMD /usr/local/directslave/bin/directslave-linux-amd64 --run
+
+# supervisord 
 COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-EXPOSE 53/udp 53/tcp 2222/tcp
-CMD ["/usr/bin/supervisord"]
+
+# ports
+EXPOSE 53/udp 53/tcp 2224/tcp 2222/tcp
+
+# CMD
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
