@@ -22,11 +22,8 @@ RUN sed -i "s/53/$(id -u bind)/g" /usr/local/directslave/etc/directslave.conf
 RUN sed -i "s/\/etc\/namedb\/directslave.inc/\/var\/lib\/bind\/slave\/directslave.inc/g" /usr/local/directslave/etc/directslave.conf
 RUN sed -i "s/\/etc\/namedb\/secondary/\/var\/lib\/bind\/slave/g" /usr/local/directslave/etc/directslave.conf
 RUN sed -i "s/\/usr\/local\/bin\/rndc/\/usr\/sbin\/rndc/g" /usr/local/directslave/etc/directslave.conf
-RUN sed -i "s/\/usr\/local\/directslave\/etc\/passwd/\/usr\/local\/directslave\/etc\/passwd\/default/g" /usr/local/directslave/etc/directslave.conf
 RUN mkdir -p /var/lib/bind/slave
 RUN touch /var/lib/bind/slave/directslave.inc
-RUN mkdir -p /usr/local/directslave/etc/passwd
-RUN touch /usr/local/directslave/etc/passwd/default
 
 # configure bind9
 RUN echo "include \"/var/lib/bind/slave/directslave.inc\";" >> /etc/bind/named.conf
@@ -45,5 +42,9 @@ COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # ports
 EXPOSE 53/udp 53/tcp 2224/tcp 2222/tcp
 
-# CMD
-CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+HEALTHCHECK CMD curl --fail http://localhost:2222/ || exit 1
+
+# ENTRYPOINT
+COPY ./entry.sh /usr/local/directslave/entry.sh
+RUN chmod +x /usr/local/directslave/entry.sh
+ENTRYPOINT ["/usr/local/directslave/entry.sh"]

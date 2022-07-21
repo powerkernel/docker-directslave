@@ -3,15 +3,20 @@ version: '3'
 volumes:
   data:
     driver: local
+  directslave:
+    driver: local
 
 services:
   directslave:
     image: powerkernel/directslave
     container_name: directslave
     restart: unless-stopped
+    environment:
+      - USER=admin
+      - PASSWD=YOUR_PASSWORD
     ports:
-      - target: 2222
-        published: 2222
+      - target: 2224
+        published: 2224
         protocol: tcp
       - target: 53
         published: 53
@@ -20,5 +25,5 @@ services:
         published: 53
         protocol: udp
     volumes:
-      - ./passwd:/usr/local/directslave/etc/passwd
       - data:/var/lib/bind/slave
+      - directslave:/usr/local/directslave
