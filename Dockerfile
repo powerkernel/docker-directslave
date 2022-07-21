@@ -39,6 +39,10 @@ RUN chmod +x /usr/local/directslave/bin/*
 RUN chown -R bind:bind /usr/local/directslave
 RUN chown -R bind:bind /var/lib/bind/slave
 
+# test
+RUN /usr/local/directslave/bin/directslave-linux-amd64 --check
+RUN rm /usr/local/directslave/etc/passwd
+
 # supervisord 
 COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
