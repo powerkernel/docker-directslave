@@ -28,6 +28,12 @@ RUN touch /var/lib/bind/slave/directslave.inc
 # configure bind9
 RUN echo "include \"/var/lib/bind/slave/directslave.inc\";" >> /etc/bind/named.conf
 
+# SSL certificate
+RUN openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
+  -keyout /usr/local/directslave/ssl/privkey.pem -out /usr/local/directslave/ssl/fullchain.pem -subj "/CN=directslave" \
+  -addext "subjectAltName=DNS:directslave"
+
+
 # permissions
 RUN chmod +x /usr/local/directslave/bin/*
 RUN chown -R bind:bind /usr/local/directslave
