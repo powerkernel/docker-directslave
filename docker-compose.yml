@@ -10,13 +10,15 @@ services:
   directslave:
     image: powerkernel/directslave
     container_name: directslave
+    labels:
+      sh.acme.autoload.domain: ns.hostname.com
     restart: unless-stopped
     environment:
-      - USER=admin
-      - PASSWD=YOUR_PASSWORD
+      - USER=YOUR_USER
+      - PASSWD=YOUR_PASSWD
     ports:
-      - target: 2224
-        published: 2224
+      - target: 2222
+        published: 2222
         protocol: tcp
       - target: 53
         published: 53
@@ -25,5 +27,23 @@ services:
         published: 53
         protocol: udp
     volumes:
-      - data:/var/lib/bind/slave
       - directslave:/usr/local/directslave
+      - data:/var/lib/bind/slave
+  acme.sh:
+    image: neilpang/acme.sh
+    container_name: acme.sh
+    command: daemon
+    restart: unless-stopped
+    volumes:
+      - ./acmeout:/acme.sh
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - CF_Token=YOUR_CF_Token
+      - CF_Account_ID=YOUR_CF_Account_ID
+      - CF_Zone_ID=YOUR_CF_Zone_ID
+      - DEPLOY_DOCKER_CONTAINER_LABEL=sh.acme.autoload.domain=ns.hostname.com
+      - DEPLOY_DOCKER_CONTAINER_KEY_FILE="/usr/local/directslave/ssl/privkey.pem"
+      - DEPLOY_DOCKER_CONTAINER_CERT_FILE="/usr/local/directslave/ssl/cert.pem"
+      - DEPLOY_DOCKER_CONTAINER_CA_FILE="/usr/local/directslave/ssl/ca.pem"
+      - DEPLOY_DOCKER_CONTAINER_FULLCHAIN_FILE="/usr/local/directslave/ssl/fullchain.pem"
+      - DEPLOY_DOCKER_CONTAINER_RELOAD_CMD="/usr/bin/supervisorctl restart directslave"
