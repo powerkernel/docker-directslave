@@ -19,6 +19,11 @@ RUN rm /usr/local/directslave/bin/directslave-freebsd-amd64 \
 RUN sed -i 's#Change_this_line_to_something_long_&_secure#'"$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)"'#g' /usr/local/directslave/etc/directslave.conf
 RUN sed -i "s/53/$(id -u bind)/g" /usr/local/directslave/etc/directslave.conf
 RUN sed -i "s/53/$(id -u bind)/g" /usr/local/directslave/etc/directslave.conf
+RUN sed -i "s/privkey.pem/key.pem/g" /usr/local/directslave/etc/directslave.conf
+RUN sed -i "s/2222/2221/g" /usr/local/directslave/etc/directslave.conf
+RUN sed -i "s/2224/2222/g" /usr/local/directslave/etc/directslave.conf
+RUN sed -i "s/background 	0/background 	1/g" /usr/local/directslave/etc/directslave.conf
+RUN sed -i "s/debug		1/debug		0/g" /usr/local/directslave/etc/directslave.conf
 RUN sed -i "s/\/etc\/namedb\/directslave.inc/\/var\/lib\/bind\/slave\/directslave.inc/g" /usr/local/directslave/etc/directslave.conf
 RUN sed -i "s/\/etc\/namedb\/secondary/\/var\/lib\/bind\/slave/g" /usr/local/directslave/etc/directslave.conf
 RUN sed -i "s/\/usr\/local\/bin\/rndc/\/usr\/sbin\/rndc/g" /usr/local/directslave/etc/directslave.conf
@@ -30,7 +35,7 @@ RUN echo "include \"/var/lib/bind/slave/directslave.inc\";" >> /etc/bind/named.c
 
 # SSL certificate
 RUN openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
-  -keyout /usr/local/directslave/ssl/privkey.pem -out /usr/local/directslave/ssl/fullchain.pem -subj "/CN=directslave" \
+  -keyout /usr/local/directslave/ssl/key.pem -out /usr/local/directslave/ssl/fullchain.pem -subj "/CN=directslave" \
   -addext "subjectAltName=DNS:directslave"
 
 
