@@ -52,9 +52,9 @@ RUN rm /usr/local/directslave/etc/passwd
 COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # ports
-EXPOSE 53/udp 53/tcp 2224/tcp 2222/tcp
+EXPOSE 53/udp 53/tcp 2221/tcp 2222/tcp
 
-HEALTHCHECK CMD curl --fail http://localhost:2222/ || exit 1
+HEALTHCHECK CMD curl --fail http://localhost:2221/ || exit 1
 
 # ENTRYPOINT
 COPY ./entry.sh /usr/local/directslave/entry.sh
