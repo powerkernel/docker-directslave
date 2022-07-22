@@ -37,6 +37,7 @@ RUN echo "include \"/var/lib/bind/slave/directslave.inc\";" >> /etc/bind/named.c
 RUN openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
   -keyout /usr/local/directslave/ssl/key.pem -out /usr/local/directslave/ssl/fullchain.pem -subj "/CN=directslave" \
   -addext "subjectAltName=DNS:directslave"
+RUN rm /usr/local/directslave/ssl/privkey.pem
 
 
 # permissions
