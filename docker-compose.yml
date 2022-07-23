@@ -46,4 +46,4 @@ services:
       - DEPLOY_DOCKER_CONTAINER_CERT_FILE="/usr/local/directslave/ssl/cert.pem"
       - DEPLOY_DOCKER_CONTAINER_CA_FILE="/usr/local/directslave/ssl/ca.pem"
       - DEPLOY_DOCKER_CONTAINER_FULLCHAIN_FILE="/usr/local/directslave/ssl/fullchain.pem"
-      - DEPLOY_DOCKER_CONTAINER_RELOAD_CMD="/usr/bin/supervisorctl restart directslave"
+      - DEPLOY_DOCKER_CONTAINER_RELOAD_CMD="chown -R bind:bind /usr/local/directslave && /usr/bin/supervisorctl restart directslave"

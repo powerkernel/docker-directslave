@@ -22,7 +22,6 @@ RUN sed -i "s/53/$(id -u bind)/g" /usr/local/directslave/etc/directslave.conf
 RUN sed -i "s/privkey.pem/key.pem/g" /usr/local/directslave/etc/directslave.conf
 RUN sed -i "s/2222/2221/g" /usr/local/directslave/etc/directslave.conf
 RUN sed -i "s/2224/2222/g" /usr/local/directslave/etc/directslave.conf
-RUN sed -i "s/background 	0/background 	1/g" /usr/local/directslave/etc/directslave.conf
 RUN sed -i "s/debug		1/debug		0/g" /usr/local/directslave/etc/directslave.conf
 RUN sed -i "s/\/etc\/namedb\/directslave.inc/\/var\/lib\/bind\/slave\/directslave.inc/g" /usr/local/directslave/etc/directslave.conf
 RUN sed -i "s/\/etc\/namedb\/secondary/\/var\/lib\/bind\/slave/g" /usr/local/directslave/etc/directslave.conf
