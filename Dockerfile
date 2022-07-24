@@ -46,6 +46,7 @@ RUN chown -R bind:bind /usr/local/directslave
 RUN chown -R bind:bind /var/lib/bind/slave
 
 # test
+RUN /usr/bin/named-checkconf /etc/bind/named.conf
 RUN /usr/local/directslave/bin/directslave-linux-amd64 --check
 RUN rm /usr/local/directslave/etc/passwd
 
