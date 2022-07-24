@@ -31,7 +31,7 @@ RUN touch /var/lib/bind/slave/directslave.inc
 
 # configure bind9
 RUN echo "include \"/var/lib/bind/slave/directslave.inc\";" >> /etc/bind/named.conf
-RUN echo 'allow-transfer {"none";};' >> /etc/bind/named.conf.options
+RUN sed -i "s/listen-on-v6 { any; };/listen-on-v6 { any; };\n        allow-transfer {\"none\";};/g" /etc/bind/named.conf.options
 
 # SSL certificate
 RUN openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
