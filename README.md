@@ -13,8 +13,9 @@ docker compose up -d
 ## SSL
 
 ```bash
-docker exec acme.sh --issue -d ns.hostname.com --dns dns_cf
-docker exec acme.sh --deploy -d ns.hostname.com  --deploy-hook docker
+docker exec acme.sh acme.sh --register-account -m admin@$(hostname -f)
+docker exec acme.sh --issue -d $(hostname -f) --dns dns_cf
+docker exec acme.sh --deploy -d $(hostname -f) --deploy-hook docker
 ```
 
 ## Usefull CMDs
