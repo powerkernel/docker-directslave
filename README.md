@@ -92,6 +92,26 @@ sed -i "s/allow-notify {.*};/$notify_allow_block/" $namedPath
 
 ```
 
+Check NS of all your DirectAdmin domains (`check-ns.sh`):
+
+```bash
+#!/bin/bash
+
+# Function to check DNS using dig
+check_dns() {
+    domain=$1
+    echo "Checking NS for domain: $domain"
+    dig +short $domain NS
+    echo "------------------------------------"
+}
+
+# Read each domain from the output of the command and check its DNS
+while IFS= read -r domain
+do
+    check_dns "$domain"
+done < <(cat /etc/virtual/domainowners | cut -d ":" -f 1)
+```
+
 ## Other info
 
 Test DNS: https://manytools.org/network/query-dns-records-online/go
